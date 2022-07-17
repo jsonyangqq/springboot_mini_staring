@@ -21,6 +21,10 @@ public class MultipleThreadHandler implements Runnable{
 
     private StringBuffer sbBuffer = new StringBuffer();
 
+    ByteBuffer inputBuffer=ByteBuffer.allocate(1024);
+
+    ByteBuffer outputBuffer=ByteBuffer.allocate(1024);
+
     private Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public MultipleThreadHandler(SocketChannel socketChannel) {
@@ -33,33 +37,33 @@ public class MultipleThreadHandler implements Runnable{
 
     @Override
     public void run() {
-        executor.execute(new EventHandler(socketChannel, key, sbBuffer));
+        executor.execute(new EventReadHandler(socketChannel, key, sbBuffer, inputBuffer, outputBuffer));
     }
 
-    static class EventHandler implements Runnable {
+    static class EventReadHandler implements Runnable {
 
         private SocketChannel socketChannel;
         private SelectionKey key;
 
         private StringBuffer sbBuffer;
 
-        ByteBuffer inputBuffer=ByteBuffer.allocate(1024);
-        ByteBuffer outputBuffer=ByteBuffer.allocate(1024);
-        public EventHandler(SocketChannel socketChannel, SelectionKey key, StringBuffer sbBuffer) {
+        private ByteBuffer inputBuffer;
+
+        private ByteBuffer outputBuffer;
+
+
+        public EventReadHandler(SocketChannel socketChannel, SelectionKey key, StringBuffer sbBuffer, ByteBuffer inputBuffer, ByteBuffer outputBuffer) {
             this.socketChannel = socketChannel;
             this.key = key;
             this.sbBuffer = sbBuffer;
+            this.inputBuffer = inputBuffer;
+            this.outputBuffer = outputBuffer;
         }
 
         @Override
         public void run() {
             try {
-//                if (this.key.isReadable()) {
-                    read();
-//                }
-//                else if (this.key.isValid() && this.key.isWritable()) {
-//                    write();
-//                }
+                read();
             } catch (Exception e) {
                 e.printStackTrace();
                 if(this.key.channel() != null) {
@@ -78,16 +82,17 @@ public class MultipleThreadHandler implements Runnable{
          * @throws IOException
          */
         private void read() throws IOException {
-            inputBuffer.clear();
             int len = socketChannel.read(inputBuffer);
             if(inputComplete(len)) {
                 System.out.println(Thread.currentThread().getName()+"------");
                 System.out.println(socketChannel.getRemoteAddress() + "Server receive Msg: " + sbBuffer.toString());
                 //将服务端接受数据回传给客户端输入流
-//                outputBuffer.put(sbBuffer.toString().getBytes(StandardCharsets.UTF_8));
-//                this.key.interestOps(SelectionKey.OP_WRITE);
-                sbBuffer.delete(0,sbBuffer.length());
+                outputBuffer.put("client get recv:\r\n".getBytes(StandardCharsets.UTF_8));
+                this.key.interestOps(SelectionKey.OP_WRITE);
+                write();
+//                sbBuffer.delete(0,sbBuffer.length());
             }
+            inputBuffer.clear();
         }
 
         /**
