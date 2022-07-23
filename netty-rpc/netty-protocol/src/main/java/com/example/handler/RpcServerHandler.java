@@ -6,6 +6,7 @@ import com.example.protocol.entity.RpcProtocol;
 import com.example.protocol.entity.RpcRequest;
 import com.example.protocol.entity.RpcResponse;
 import com.example.spring.SpringBeanManager;
+import com.example.spring.service.Mediator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -25,17 +26,20 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcProtocol<Rp
         RpcProtocol<RpcResponse> responseRpcProtocol = new RpcProtocol<>();
         Header header = msg.getHeader();
         header.setReqType(ReqType.RESPONSE.getCode());
-        Object content = invoke(msg.getContent());
+        Mediator instance = Mediator.getInstance();
+        Object data = instance.process(msg.getContent());
         responseRpcProtocol.setHeader(header);
         RpcResponse response = new RpcResponse();
         response.setCode(200);
         response.setMessage("Success");
-        response.setObject(content);
+        response.setObject(data);
         responseRpcProtocol.setContent(response);
         // 将数据返回给客户端
         ctx.writeAndFlush(responseRpcProtocol);
     }
 
+
+    @Deprecated
     private Object invoke(RpcRequest rpcRequest) {
         try {
             Class<?> clazz = Class.forName(rpcRequest.getClassName());

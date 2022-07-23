@@ -1,14 +1,14 @@
 package com.example.service;
 
+import com.example.annotation.DTRemoteService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * @author jason.yang
  * @Description
  * @Date 2022-07-20 10:33
  */
-@Service
+@DTRemoteService
 @Slf4j
 public class UserServiceImpl implements IUserService {
 

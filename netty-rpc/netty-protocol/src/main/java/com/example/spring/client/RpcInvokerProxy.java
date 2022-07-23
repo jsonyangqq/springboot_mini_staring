@@ -1,4 +1,4 @@
-package com.example;
+package com.example.spring.client;
 
 import com.example.constant.ReqType;
 import com.example.constant.RequestHolder;
@@ -15,11 +15,10 @@ import java.lang.reflect.Method;
 
 /**
  * @author jason.yang
- * @Description 真实的代理对象类
- * @Date 2022-07-20 10:50
+ * @Description
+ * @Date 2022-07-22 14:52
  */
 @Slf4j
-@Deprecated
 public class RpcInvokerProxy implements InvocationHandler {
 
     private String host;

@@ -7,6 +7,7 @@ import java.lang.reflect.Proxy;
  * @Description 客户端代理类
  * @Date 2022-07-20 10:46
  */
+@Deprecated
 public class RpcClientProxy {
 
     public <T> T clientProxy(final Class<T> interfaceClass, String host, int port) {

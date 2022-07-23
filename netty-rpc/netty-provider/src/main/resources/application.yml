@@ -1,6 +1,4 @@
-server:
-  port: 8088
 dt:
   rpc:
-    client:
+    service:
       serverPort: 8080

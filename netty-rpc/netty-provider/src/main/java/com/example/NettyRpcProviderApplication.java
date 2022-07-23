@@ -1,6 +1,5 @@
 package com.example;
 
-import com.example.protocol.NettyServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,13 +10,12 @@ import org.springframework.context.annotation.ComponentScan;
  * @Date 2022-07-20 10:39
  */
 // 注册spring容器相关和服务接口发布相关类
-@ComponentScan(basePackages = {"com.example.spring","com.example.service"})
+@ComponentScan(basePackages = {"com.example.spring.service","com.example.service"})
 @SpringBootApplication
 public class NettyRpcProviderApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(NettyRpcProviderApplication.class, args);
-        new NettyServer("127.0.0.1", 8080).startServer();
     }
 
 }

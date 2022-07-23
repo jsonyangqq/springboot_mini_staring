@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.RpcClientProxy;
+import com.example.annotation.DTRemoteReference;
 import com.example.service.IUserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-    private RpcClientProxy rcp=new RpcClientProxy();
+    @DTRemoteReference
+    private IUserService userService;
 
 
     @GetMapping("/saveUser")
     public String saveUser(@RequestParam("name") String name){
-        IUserService userService=rcp.clientProxy(IUserService.class,"127.0.0.1",8080);
         return userService.saveUser(name);
     }
 

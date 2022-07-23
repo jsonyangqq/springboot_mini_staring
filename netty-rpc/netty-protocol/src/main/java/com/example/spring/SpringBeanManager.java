@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
  * @Description springBean容器的管理
  * @Date 2022-07-19 23:21
  */
+@Deprecated
 @Component
 public class SpringBeanManager implements ApplicationContextAware {
 
