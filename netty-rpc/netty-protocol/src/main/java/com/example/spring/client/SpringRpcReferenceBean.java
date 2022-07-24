@@ -1,5 +1,8 @@
 package com.example.spring.client;
 
+import com.example.registry.IRegistryService;
+import com.example.registry.RegistryFactory;
+import com.example.registry.RegistryType;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Proxy;
@@ -15,9 +18,9 @@ public class SpringRpcReferenceBean implements FactoryBean<Object> {
 
     private Class<?> interfaceClass;
 
-    private String serverAddress;
+    private String registryAddress;
 
-    private int serverPort;
+    private byte registry;
 
     @Override
     public Object getObject() throws Exception {
@@ -33,8 +36,9 @@ public class SpringRpcReferenceBean implements FactoryBean<Object> {
      * 动态生成代理类
      */
     public void init() {
+        IRegistryService registryService = RegistryFactory.createRegistryService(this.registryAddress, RegistryType.findByRegistryType(this.registry));
         this.object = Proxy.newProxyInstance(interfaceClass.getClassLoader(),
-                new Class[]{interfaceClass}, new RpcInvokerProxy(this.serverAddress, this.serverPort));
+                new Class[]{interfaceClass}, new RpcInvokerProxy(registryService));
     }
 
 
@@ -46,11 +50,12 @@ public class SpringRpcReferenceBean implements FactoryBean<Object> {
         this.interfaceClass = interfaceClass;
     }
 
-    public void setServerPort(int serverPort) {
-        this.serverPort = serverPort;
+
+    public void setRegistryAddress(String registryAddress) {
+        this.registryAddress = registryAddress;
     }
 
-    public void setServerAddress(String serverAddress) {
-        this.serverAddress = serverAddress;
+    public void setRegistry(byte registry) {
+        this.registry = registry;
     }
 }

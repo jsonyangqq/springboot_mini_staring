@@ -6,6 +6,7 @@ import com.example.constant.RpcConstantHelper;
 import com.example.constant.SerialType;
 import com.example.protocol.NettyClient;
 import com.example.protocol.entity.*;
+import com.example.registry.IRegistryService;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,11 @@ import java.lang.reflect.Method;
 @Slf4j
 public class RpcInvokerProxy implements InvocationHandler {
 
-    private String host;
-    private int port;
 
-    public RpcInvokerProxy(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private IRegistryService registryService;
+
+    public RpcInvokerProxy(IRegistryService registryService) {
+        this.registryService = registryService;
     }
 
     @Override
@@ -44,11 +44,11 @@ public class RpcInvokerProxy implements InvocationHandler {
         request.setParams(args);
         reqProtocol.setContent(request);
 
-        NettyClient nettyClient=new NettyClient(host,port);
+        NettyClient nettyClient=new NettyClient();
         //①.提供回调：这边添加一个reqeustId和Future对象包装的Promisse的映射关系，为了让客户端收到响应数据后能够及时返回
         RpcFuture<RpcResponse> future=new RpcFuture<>(new DefaultPromise<RpcResponse>(new DefaultEventLoop()));
         RequestHolder.REQUEST_MAP.put(requestId,future);
-        nettyClient.sendRequest(reqProtocol);
+        nettyClient.sendRequest(reqProtocol, this.registryService);
         return future.getPromise().get().getObject();
     }
 

@@ -17,8 +17,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,23 +32,19 @@ public class SpringRpcReferencePostProcessor implements ApplicationContextAware,
 
     private ApplicationContext applicationContext;
 
-    private int serverPort;
+    private String registryAddress;
 
-    private String serverAddress;
+    private byte registry;
 
     /**
      * 保存发布时使用的Bean的信息
      */
     public final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
-    public SpringRpcReferencePostProcessor(int serverPort) {
+    public SpringRpcReferencePostProcessor(String registryAddress, byte registry) {
         log.info("registry SpringRpcReferencePostProcessor construct.");
-        this.serverPort = serverPort;
-        try {
-            this.serverAddress = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        this.registryAddress = registryAddress;
+        this.registry = registry;
     }
 
     @Override
@@ -93,8 +87,8 @@ public class SpringRpcReferencePostProcessor implements ApplicationContextAware,
             BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringRpcReferenceBean.class);
             builder.setInitMethodName("init");
             builder.addPropertyValue("interfaceClass", field.getType());
-            builder.addPropertyValue("serverAddress",this.serverAddress);
-            builder.addPropertyValue("serverPort",this.serverPort);
+            builder.addPropertyValue("registryAddress",this.registryAddress);
+            builder.addPropertyValue("registry",this.registry);
             BeanDefinition beanDefinition = builder.getBeanDefinition();
             beanDefinitionMap.put(field.getName(), beanDefinition);
         }

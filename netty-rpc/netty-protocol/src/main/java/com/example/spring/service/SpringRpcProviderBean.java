@@ -2,6 +2,8 @@ package com.example.spring.service;
 
 import com.example.annotation.DTRemoteService;
 import com.example.protocol.NettyServer;
+import com.example.registry.IRegistryService;
+import com.example.registry.ServiceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -19,10 +21,12 @@ public class SpringRpcProviderBean implements InitializingBean, BeanPostProcesso
 
     private String serverAddress;
     private int serverPort;
+    private IRegistryService registryService;
 
-    public SpringRpcProviderBean(String serverAddress, int serverPort) {
+    public SpringRpcProviderBean(String serverAddress, int serverPort, IRegistryService registryService) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        this.registryService = registryService;
     }
 
     /**
@@ -49,16 +53,22 @@ public class SpringRpcProviderBean implements InitializingBean, BeanPostProcesso
         Class<?> aClass = bean.getClass();
         // 判断类中是否有指定的注解
         if(aClass.isAnnotationPresent(DTRemoteService.class)) {
+            String serviceName = bean.getClass().getInterfaces()[0].getName();
             Method[] methods = aClass.getDeclaredMethods();
             for (Method method : methods) {
                 // 类名+方法名
-                String key = bean.getClass().getInterfaces()[0].getName() + "." + method.getName();
+                String key = serviceName + "." + method.getName();
                 BeanMethod beanMethod = new BeanMethod();
                 beanMethod.setBean(bean);
                 beanMethod.setMethod(method);
                 Mediator.beanMethodMap.put(key, beanMethod);
             }
-
+            //完成服务注册
+            ServiceInfo serviceInfo = new ServiceInfo();
+            serviceInfo.setServiceName(serviceName);
+            serviceInfo.setServiceAddress(this.serverAddress);
+            serviceInfo.setServicePort(this.serverPort);
+            registryService.register(serviceInfo);
         }
         return bean;
     }

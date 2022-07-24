@@ -3,6 +3,8 @@ package com.example.protocol;
 import com.example.handler.RpcClienInitializer;
 import com.example.protocol.entity.RpcProtocol;
 import com.example.protocol.entity.RpcRequest;
+import com.example.registry.IRegistryService;
+import com.example.registry.ServiceInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -22,14 +24,13 @@ public class NettyClient {
 
     private final EventLoopGroup eventLoopGroup;
 
-    private String serverAddress;
+//    private String serverAddress;
+//    private int serverPort;
 
-    private int serverPort;
-
-    public NettyClient(String serverAddress, int serverPort) {
-        log.info("begin started netty client, serverAddress:{},serverPort:{}", serverAddress, serverPort);
-        this.serverAddress = serverAddress;
-        this.serverPort = serverPort;
+    public NettyClient() {
+//        log.info("begin started netty client, serverAddress:{},serverPort:{}", serverAddress, serverPort);
+//        this.serverAddress = serverAddress;
+//        this.serverPort = serverPort;
         bootstrap = new Bootstrap();
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap.group(eventLoopGroup)
@@ -38,14 +39,17 @@ public class NettyClient {
                 .handler(new RpcClienInitializer());
     }
 
-    public void sendRequest(RpcProtocol<RpcRequest> protocol) throws InterruptedException {
-        ChannelFuture future = bootstrap.connect(this.serverAddress, this.serverPort).sync();
+    public void sendRequest(RpcProtocol<RpcRequest> protocol, IRegistryService registryService) throws InterruptedException {
+        // 根据类名发现已经注册到zookeeper上面的服务
+        ServiceInfo serviceInfo = registryService.discovery(protocol.getContent().getClassName());
+        // 这里的服务地址本来是启动这个Netty服务端的地址，由于我们把服务发布到了Zookeeper上面，所以地址就是Zookeeper的启动地址了
+        ChannelFuture future = bootstrap.connect(serviceInfo.getServiceAddress(), serviceInfo.getServicePort()).sync();
         // 给future添加监听器
         future.addListener(listener -> {
            if(listener.isSuccess()) {
-               log.info("Connect rpc server success,serverAddress:{}", this.serverAddress);
+               log.info("Connect rpc server success,serverAddress:{}", serviceInfo.getServiceAddress());
            } else {
-               log.error("Connect rpc server fail,serverAddress:{}", this.serverAddress);
+               log.error("Connect rpc server fail,serverAddress:{}", serviceInfo.getServiceAddress());
                future.cause().printStackTrace();
                eventLoopGroup.shutdownGracefully();
            }

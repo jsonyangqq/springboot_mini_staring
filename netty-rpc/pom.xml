@@ -8,6 +8,7 @@
         <module>netty-api</module>
         <module>netty-consumer</module>
         <module>netty-provider</module>
+        <module>netty-registry</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

@@ -8,6 +8,7 @@ import lombok.Data;
  * @Date 2022-07-22 22:09
  */
 @Data
+@Deprecated
 public class RpcInitialClientProperties{
 
     private int serverPort;

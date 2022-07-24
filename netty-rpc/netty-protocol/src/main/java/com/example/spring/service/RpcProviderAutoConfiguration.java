@@ -1,5 +1,8 @@
 package com.example.spring.service;
 
+import com.example.registry.IRegistryService;
+import com.example.registry.RegistryFactory;
+import com.example.registry.RegistryType;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +27,8 @@ public class RpcProviderAutoConfiguration {
     @Bean
     public SpringRpcProviderBean springRpcProviderBean(RpcServerProperties rpcServerProperties) throws UnknownHostException {
         String hostAddress = InetAddress.getLocalHost().getHostAddress();
-        return new SpringRpcProviderBean(hostAddress, rpcServerProperties.getServerPort());
+        IRegistryService registryService = RegistryFactory.createRegistryService(rpcServerProperties.getRegistryAddress(), RegistryType.findByRegistryType(rpcServerProperties.getRegistry()));
+        return new SpringRpcProviderBean(hostAddress, rpcServerProperties.getServerPort(), registryService);
     }
 
 }

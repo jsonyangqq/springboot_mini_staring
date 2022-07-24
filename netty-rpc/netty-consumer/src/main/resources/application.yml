@@ -3,4 +3,5 @@ server:
 dt:
   rpc:
     client:
-      serverPort: 8080
+      registryAddress: 192.168.235.164:2181
+      registry: 1

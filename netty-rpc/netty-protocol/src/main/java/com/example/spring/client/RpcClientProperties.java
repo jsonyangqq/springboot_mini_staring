@@ -11,6 +11,12 @@ import lombok.Data;
 //@ConfigurationProperties(prefix = "dt.rpc.client")
 public class RpcClientProperties {
 
-    private int serverPort;
+//    private int serverPort;
+
+    // 服务注册地址
+    private String registryAddress;
+
+    // 服务注册类型
+    private byte registry;
 
 }
